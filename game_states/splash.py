@@ -10,7 +10,8 @@ HEART_SPRITE = pygame.image.load('res/img/heart.png')
 
 class Splash:
     MINIGAMES = []
-    _duration = 3
+    '''_duration = 3'''
+    _duration = 0
 
     '''Display the splash screen with some info in between minigames'''
     def __init__(self, game):

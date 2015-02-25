@@ -29,6 +29,8 @@ class Menu:
         self.selected = [False, False]
 
     def run(self):
+        self.start_game()
+        return
         # Show game menu
         # Perhaps something that await two player input
         # while display "Insert coins..."
