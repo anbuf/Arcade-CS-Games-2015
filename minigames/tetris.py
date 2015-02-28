@@ -39,7 +39,7 @@ WHITE=(255,255,255)
 BLACK=(0,0,0)
 
 GRID_SIZE_X=12
-GRID_SIZE_Y=16
+GRID_SIZE_Y=20
 
 MAX_SLOWDOWN = 20
 
@@ -112,8 +112,15 @@ class Tetris(multiplayer.Minigame):
 
     def get_results(self):
         results = [True for i in range(len(self.boards))]
-        if self.loser is not None:
-            results[self.loser.number] = False
+        if self.loser is None:
+            self.loser = self.boards[0]
+            for board in self.boards:
+                if board.score < self.loser.score:
+                    self.loser = board
+                elif board.score == self.loser.score:
+                    results[board.number] = False
+    
+        results[self.loser.number] = False
         return results
 
 class Board():
@@ -133,7 +140,6 @@ class Board():
             x_coordinate+=BLOCK_WIDTH
             y_coordinate=50
             for j in range(0,GRID_SIZE_Y,1):
-                #print i,j
                 self.block_grid[i][j].rect.topleft=x_coordinate,y_coordinate
                 self.block_grid[i][j].indexes=i,j
                 self.sprites.add(self.block_grid[i][j])
@@ -141,6 +147,7 @@ class Board():
 
         self.current_tetra=[]
         self.result = True
+        self.score = 0
 
     def tick(self):
         self.update()
@@ -161,9 +168,11 @@ class Board():
         else:
             self.handleEvents()
             self.moveTetra("down")
+            self.score += 1
 
         if not self.current_tetra:
                 self.clearLines()
+                self.score += 10
 
     def get_result(self):
         return self.result
