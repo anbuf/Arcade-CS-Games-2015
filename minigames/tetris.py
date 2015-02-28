@@ -9,8 +9,6 @@ import input_map
 import random
 
 '''
-SHOULD LOOK REALLY GHETTO!!!
-
 
 Number of players: 2
 Type: 1 vs 1
@@ -41,7 +39,9 @@ WHITE=(255,255,255)
 BLACK=(0,0,0)
 
 GRID_SIZE_X=12
-GRID_SIZE_Y=20
+GRID_SIZE_Y=16
+
+MAX_SLOWDOWN = 20
 
 class Tetris(multiplayer.Minigame):
     name = 'Tetris'
@@ -60,16 +60,20 @@ class Tetris(multiplayer.Minigame):
 
         self.events = [[] for i in range(2)]
 
-        self.slowdown = 10
+        self.slowdown = MAX_SLOWDOWN / (self.difficulty + 1)
         self.slowdown_counter = 0
+        self.loser = None
 
     def tick(self):
+        results = []
         if(self.slowdown == self.slowdown_counter):
             for board in self.boards:
                 board.tick()
             self.slowdown_counter = 0
 
+
         self.update()
+        self.updateResult()
         self.draw()
         self.slowdown_counter = self.slowdown_counter + 1
 
@@ -96,12 +100,21 @@ class Tetris(multiplayer.Minigame):
                         if e.key == event.key:
                             self.events[1].remove(e)
 
+    def updateResult(self):
+        if self.loser is None:
+            for board in self.boards:
+                if board.get_result() is False:
+                    self.loser = board
+
 
     def get_events(self, number):
         return self.events[number]
 
-    def get_result(self):
-        return self.result
+    def get_results(self):
+        results = [True for i in range(len(self.boards))]
+        if self.loser is not None:
+            results[self.loser.number] = False
+        return results
 
 class Board():
 
@@ -127,6 +140,7 @@ class Board():
                 y_coordinate+=BLOCK_WIDTH
 
         self.current_tetra=[]
+        self.result = True
 
     def tick(self):
         self.update()
@@ -144,7 +158,6 @@ class Board():
         if not self.current_tetra:
             if not self.createNewCurrentTetra():
                 self.result = False
-                print "Loser"
         else:
             self.handleEvents()
             self.moveTetra("down")
